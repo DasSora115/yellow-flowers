@@ -25,6 +25,9 @@ const letterButton = document.querySelector("#letterButton");
 const letterDialog = document.querySelector("#letterDialog");
 const letterClose = document.querySelector("#letterClose");
 const soundButton = document.querySelector("#soundButton");
+const musicDialog = document.querySelector("#musicDialog");
+const musicClose = document.querySelector("#musicClose");
+const musicContinue = document.querySelector("#musicContinue");
 const discovered = new Set();
 const isTouchViewport = window.matchMedia("(pointer: coarse)");
 const flowerHotspots = [];
@@ -200,11 +203,12 @@ function releasePetals(amount = 18) {
 }
 
 beginButton.addEventListener("click", async () => {
-  await setAmbience(true);
   body.classList.remove("not-loaded");
   body.classList.add("experience-started");
   opening.classList.add("is-gone");
   createShootingStar();
+  soundButton.classList.add("is-highlighted");
+  showCenteredDialog(musicDialog);
   await wait(3300);
   body.classList.add("experience-ready");
   setFlowerHotspotsEnabled(true);
@@ -218,8 +222,14 @@ letterButton.addEventListener("click", () => {
   releasePetals(22);
 });
 letterClose.addEventListener("click", () => letterDialog.close());
+musicClose.addEventListener("click", () => musicDialog.close());
+musicContinue.addEventListener("click", () => musicDialog.close());
+soundButton.addEventListener("click", () => {
+  soundButton.classList.remove("is-highlighted");
+  showCenteredDialog(musicDialog);
+});
 
-[memoryDialog, letterDialog].forEach((dialog) => {
+[memoryDialog, letterDialog, musicDialog].forEach((dialog) => {
   dialog.addEventListener("close", () => requestAnimationFrame(resetViewport));
   dialog.addEventListener("click", (event) => {
     const box = dialog.getBoundingClientRect();
@@ -231,46 +241,6 @@ letterClose.addEventListener("click", () => letterDialog.close());
 
 window.addEventListener("resize", resetViewport);
 window.visualViewport?.addEventListener("resize", resetViewport);
-
-let audioContext;
-let ambienceTimer;
-let ambienceOn = false;
-
-function playChime(frequency, delay = 0) {
-  const oscillator = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-  oscillator.type = "sine";
-  oscillator.frequency.value = frequency;
-  gain.gain.setValueAtTime(0.0001, audioContext.currentTime + delay);
-  gain.gain.exponentialRampToValueAtTime(0.045, audioContext.currentTime + delay + 0.05);
-  gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + delay + 1.7);
-  oscillator.connect(gain).connect(audioContext.destination);
-  oscillator.start(audioContext.currentTime + delay);
-  oscillator.stop(audioContext.currentTime + delay + 1.8);
-}
-
-function playAmbiencePhrase() {
-  [261.63, 329.63, 392].forEach((frequency, index) => playChime(frequency, index * 0.28));
-}
-
-async function setAmbience(enabled) {
-  ambienceOn = enabled;
-  soundButton.setAttribute("aria-pressed", String(ambienceOn));
-  soundButton.querySelector(".sound-label").textContent = ambienceOn ? "Sonando" : "Sonido";
-  if (ambienceOn) {
-    audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
-    await audioContext.resume();
-    window.clearInterval(ambienceTimer);
-    playAmbiencePhrase();
-    ambienceTimer = window.setInterval(playAmbiencePhrase, 5200);
-  } else {
-    window.clearInterval(ambienceTimer);
-  }
-}
-
-soundButton.addEventListener("click", async () => {
-  await setAmbience(!ambienceOn);
-});
 
 window.setInterval(() => {
   if (body.classList.contains("experience-started") && Math.random() > 0.35) {
