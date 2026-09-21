@@ -1482,6 +1482,29 @@ body::after {
   border-radius: 14px;
   background: #121212;
 }
+.music-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 999px;
+  color: #211900;
+  background: linear-gradient(135deg, #fff1a4, #ffc521);
+  box-shadow: 0 14px 38px rgba(255, 194, 26, .22);
+  font: 700 1rem/1 "Manrope", sans-serif;
+  cursor: pointer;
+}
+.music-play:disabled {
+  color: rgba(255, 248, 226, .65);
+  background: rgba(255, 255, 255, .1);
+  box-shadow: none;
+  cursor: wait;
+}
+.music-play:not(:disabled):active { transform: scale(.98); }
 .music-dialog .dialog-next { margin-top: 16px; }
 
 .petal {
