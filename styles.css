@@ -1259,12 +1259,49 @@ body::after {
 .flower {
   cursor: pointer;
   outline: none;
+  pointer-events: none;
   filter: saturate(.94);
   transition: filter 260ms ease;
 }
 
 .flower:hover,
-.flower:focus-visible { filter: saturate(1.15) brightness(1.08); }
+.flower:focus-visible,
+.flower.is-hotspot-hovered { filter: saturate(1.15) brightness(1.08); }
+
+.flower-hotspots {
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+  pointer-events: none;
+}
+
+.flower-hotspot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  clip-path: circle(50%);
+  cursor: pointer;
+  touch-action: manipulation;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.flower-hotspot:disabled {
+  pointer-events: none;
+}
+
+.flower-hotspot:focus-visible {
+  outline: 2px solid rgba(255, 221, 83, .95);
+  outline-offset: 3px;
+  background: rgba(255, 214, 52, .08);
+  box-shadow: 0 0 22px rgba(255, 214, 52, .32);
+}
 
 .flower::after {
   content: "";

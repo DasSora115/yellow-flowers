@@ -27,6 +27,8 @@ const letterClose = document.querySelector("#letterClose");
 const soundButton = document.querySelector("#soundButton");
 const discovered = new Set();
 const isTouchViewport = window.matchMedia("(pointer: coarse)");
+const flowerHotspots = [];
+let lastHotspotSync = 0;
 
 const terminalSteps = [
   { text: "> Inicializando sorpresa para Any…", wait: 330 },
@@ -83,31 +85,70 @@ function buildProgress() {
   });
 }
 
-function decorateFlowers() {
-  flowers.forEach((flower, index) => {
-    flower.dataset.reason = index;
-    flower.tabIndex = 0;
-    flower.setAttribute("role", "button");
-    flower.setAttribute("aria-label", `Descubrir la razón ${index + 1}`);
-    flower.addEventListener("pointerdown", () => requestAnimationFrame(resetViewport));
-    flower.addEventListener("click", () => {
-      flower.blur();
-      resetViewport();
-      openReason(index);
+function syncFlowerHotspots(timestamp = 0) {
+  if (timestamp - lastHotspotSync >= 30) {
+    flowerHotspots.forEach((hotspot, index) => {
+      const center = flowers[index].querySelector(".flower__white-circle");
+      const rect = center.getBoundingClientRect();
+      const size = Math.max(72, Math.min(92, Math.max(rect.width, rect.height) * 1.85));
+      const left = Math.max(0, Math.min(window.innerWidth - size, rect.left + rect.width / 2 - size / 2));
+      const top = Math.max(0, Math.min(window.innerHeight - size, rect.top + rect.height / 2 - size / 2));
+
+      hotspot.style.width = `${size}px`;
+      hotspot.style.height = `${size}px`;
+      hotspot.style.transform = `translate3d(${left}px, ${top}px, 0)`;
     });
-    flower.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        openReason(index);
-      }
-    });
+    lastHotspotSync = timestamp;
+  }
+
+  window.requestAnimationFrame(syncFlowerHotspots);
+}
+
+function setFlowerHotspotsEnabled(enabled) {
+  flowerHotspots.forEach((hotspot, index) => {
+    hotspot.disabled = !enabled || discovered.has(index);
   });
 }
 
+function decorateFlowers() {
+  const hotspotLayer = document.createElement("div");
+  hotspotLayer.className = "flower-hotspots";
+  hotspotLayer.setAttribute("aria-label", "Flores con mensajes");
+  body.appendChild(hotspotLayer);
+
+  flowers.forEach((flower, index) => {
+    flower.dataset.reason = index;
+    flower.tabIndex = -1;
+    flower.removeAttribute("role");
+    flower.removeAttribute("aria-label");
+
+    const hotspot = document.createElement("button");
+    hotspot.type = "button";
+    hotspot.className = "flower-hotspot";
+    hotspot.disabled = true;
+    hotspot.setAttribute("aria-label", `Descubrir la razón ${index + 1}`);
+    hotspot.addEventListener("pointerdown", () => requestAnimationFrame(resetViewport));
+    hotspot.addEventListener("pointerenter", () => flower.classList.add("is-hotspot-hovered"));
+    hotspot.addEventListener("pointerleave", () => flower.classList.remove("is-hotspot-hovered"));
+    hotspot.addEventListener("focus", () => flower.classList.add("is-hotspot-hovered"));
+    hotspot.addEventListener("blur", () => flower.classList.remove("is-hotspot-hovered"));
+    hotspot.addEventListener("click", () => {
+      resetViewport();
+      openReason(index);
+    });
+    hotspotLayer.appendChild(hotspot);
+    flowerHotspots.push(hotspot);
+  });
+
+  window.requestAnimationFrame(syncFlowerHotspots);
+}
+
 function openReason(index) {
+  if (discovered.has(index)) return;
   resetViewport();
   discovered.add(index);
   flowers[index].classList.add("is-discovered");
+  flowerHotspots[index].disabled = true;
   progress.children[index]?.classList.add("is-on");
   dialogKicker.textContent = `RAZÓN ${String(index + 1).padStart(2, "0")} · PARA ${EXPERIENCE.name.toUpperCase()}`;
   dialogMessage.textContent = EXPERIENCE.reasons[index];
@@ -135,7 +176,7 @@ function focusNextFlower() {
   if (nextIndex >= 0) {
     memoryDialog.close();
     if (!isTouchViewport.matches) {
-      flowers[nextIndex].focus({ preventScroll: true });
+      flowerHotspots[nextIndex].focus({ preventScroll: true });
     }
     requestAnimationFrame(resetViewport);
   } else {
@@ -166,6 +207,7 @@ beginButton.addEventListener("click", async () => {
   createShootingStar();
   await wait(3300);
   body.classList.add("experience-ready");
+  setFlowerHotspotsEnabled(true);
   releasePetals(9);
 });
 
