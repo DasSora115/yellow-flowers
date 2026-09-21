@@ -26,6 +26,7 @@ const letterDialog = document.querySelector("#letterDialog");
 const letterClose = document.querySelector("#letterClose");
 const soundButton = document.querySelector("#soundButton");
 const discovered = new Set();
+const isTouchViewport = window.matchMedia("(pointer: coarse)");
 
 const terminalSteps = [
   { text: "> Inicializando sorpresa para Any…", wait: 330 },
@@ -35,6 +36,20 @@ const terminalSteps = [
 ];
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function resetViewport() {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollLeft = 0;
+  document.documentElement.scrollTop = 0;
+  body.scrollLeft = 0;
+  body.scrollTop = 0;
+}
+
+function showCenteredDialog(dialog) {
+  resetViewport();
+  dialog.showModal();
+  requestAnimationFrame(resetViewport);
+}
 
 async function typeTerminal() {
   terminalLine.textContent = "";
@@ -74,7 +89,12 @@ function decorateFlowers() {
     flower.tabIndex = 0;
     flower.setAttribute("role", "button");
     flower.setAttribute("aria-label", `Descubrir la razón ${index + 1}`);
-    flower.addEventListener("click", () => openReason(index));
+    flower.addEventListener("pointerdown", () => requestAnimationFrame(resetViewport));
+    flower.addEventListener("click", () => {
+      flower.blur();
+      resetViewport();
+      openReason(index);
+    });
     flower.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -85,13 +105,14 @@ function decorateFlowers() {
 }
 
 function openReason(index) {
+  resetViewport();
   discovered.add(index);
   flowers[index].classList.add("is-discovered");
   progress.children[index]?.classList.add("is-on");
   dialogKicker.textContent = `RAZÓN ${String(index + 1).padStart(2, "0")} · PARA ${EXPERIENCE.name.toUpperCase()}`;
   dialogMessage.textContent = EXPERIENCE.reasons[index];
   dialogNext.textContent = discovered.size === flowers.length ? "Leer mi carta" : "Descubrir otra flor";
-  memoryDialog.showModal();
+  showCenteredDialog(memoryDialog);
   updateJourney();
   if (navigator.vibrate) navigator.vibrate(28);
 }
@@ -113,10 +134,13 @@ function focusNextFlower() {
   const nextIndex = flowers.findIndex((_, index) => !discovered.has(index));
   if (nextIndex >= 0) {
     memoryDialog.close();
-    flowers[nextIndex].focus({ preventScroll: true });
+    if (!isTouchViewport.matches) {
+      flowers[nextIndex].focus({ preventScroll: true });
+    }
+    requestAnimationFrame(resetViewport);
   } else {
     memoryDialog.close();
-    letterDialog.showModal();
+    showCenteredDialog(letterDialog);
   }
 }
 
@@ -148,12 +172,13 @@ beginButton.addEventListener("click", async () => {
 dialogClose.addEventListener("click", () => memoryDialog.close());
 dialogNext.addEventListener("click", focusNextFlower);
 letterButton.addEventListener("click", () => {
-  letterDialog.showModal();
+  showCenteredDialog(letterDialog);
   releasePetals(22);
 });
 letterClose.addEventListener("click", () => letterDialog.close());
 
 [memoryDialog, letterDialog].forEach((dialog) => {
+  dialog.addEventListener("close", () => requestAnimationFrame(resetViewport));
   dialog.addEventListener("click", (event) => {
     const box = dialog.getBoundingClientRect();
     const outside = event.clientX < box.left || event.clientX > box.right ||
@@ -161,6 +186,9 @@ letterClose.addEventListener("click", () => letterDialog.close());
     if (outside) dialog.close();
   });
 });
+
+window.addEventListener("resize", resetViewport);
+window.visualViewport?.addEventListener("resize", resetViewport);
 
 let audioContext;
 let ambienceTimer;
