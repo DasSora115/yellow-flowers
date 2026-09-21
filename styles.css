@@ -1421,7 +1421,13 @@ body::after {
   .name-phrase { white-space:normal; text-align:center; line-height:1.25; font-size:.83rem; }
   .sound-label { display:none; }
   .sound-button { width:40px; padding:0; justify-content:center; }
-  .experience-ui { bottom:max(13px,env(safe-area-inset-bottom)); }
+  /* Mantiene el panel completo por encima de la barra inferior del navegador móvil. */
+  .experience-ui {
+    bottom: max(76px, calc(env(safe-area-inset-bottom) + 68px));
+  }
+  .letter-button {
+    bottom: max(145px, calc(env(safe-area-inset-bottom) + 137px));
+  }
   .memory-dialog,
   .letter-dialog {
     width: calc(100% - 24px);
