@@ -28,10 +28,27 @@ const soundButton = document.querySelector("#soundButton");
 const musicDialog = document.querySelector("#musicDialog");
 const musicClose = document.querySelector("#musicClose");
 const musicContinue = document.querySelector("#musicContinue");
+const musicPlayButton = document.querySelector("#musicPlayButton");
+const musicPlayLabel = musicPlayButton.querySelector(".music-play-label");
+const spotifyEmbed = document.querySelector("#spotifyEmbed");
 const discovered = new Set();
 const isTouchViewport = window.matchMedia("(pointer: coarse)");
 const flowerHotspots = [];
 let lastHotspotSync = 0;
+let spotifyController;
+let spotifyPlaying = false;
+
+window.onSpotifyIframeApiReady = (IFrameAPI) => {
+  IFrameAPI.createController(spotifyEmbed, {
+    width: "100%",
+    height: "152",
+    uri: "spotify:track:35ttE4t8lQZA2vuCYDg4G7"
+  }, (controller) => {
+    spotifyController = controller;
+    musicPlayButton.disabled = false;
+    musicPlayLabel.textContent = "Reproducir M.A.I";
+  });
+};
 
 const terminalSteps = [
   { text: "> Inicializando sorpresa para Any…", wait: 330 },
@@ -224,6 +241,14 @@ letterButton.addEventListener("click", () => {
 letterClose.addEventListener("click", () => letterDialog.close());
 musicClose.addEventListener("click", () => musicDialog.close());
 musicContinue.addEventListener("click", () => musicDialog.close());
+musicPlayButton.addEventListener("click", () => {
+  if (!spotifyController) return;
+  spotifyController.togglePlay();
+  spotifyPlaying = !spotifyPlaying;
+  musicPlayButton.querySelector("span[aria-hidden]").textContent = spotifyPlaying ? "❚❚" : "▶";
+  musicPlayLabel.textContent = spotifyPlaying ? "Pausar M.A.I" : "Reproducir M.A.I";
+  soundButton.classList.toggle("is-highlighted", spotifyPlaying);
+});
 soundButton.addEventListener("click", () => {
   soundButton.classList.remove("is-highlighted");
   showCenteredDialog(musicDialog);
