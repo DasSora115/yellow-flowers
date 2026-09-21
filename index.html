@@ -3,16 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Para mi Any linda</title>
+  <meta name="theme-color" content="#03090d">
+  <meta name="description" content="Un jardín de flores amarillas programado especialmente para Any.">
+  <title>Para mi Any linda ✦</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='9' fill='%23a66a00'/%3E%3Cg fill='%23ffd735'%3E%3Cellipse cx='32' cy='12' rx='8' ry='13'/%3E%3Cellipse cx='32' cy='52' rx='8' ry='13'/%3E%3Cellipse cx='12' cy='32' rx='13' ry='8'/%3E%3Cellipse cx='52' cy='32' rx='13' ry='8'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="not-loaded">
+
+  <section class="opening" id="opening" aria-label="Inicio de la sorpresa">
+    <div class="opening__stars" aria-hidden="true"></div>
+    <div class="terminal-card">
+      <div class="terminal-bar"><span></span><span></span><span></span><b>SORPRESA.EXE</b></div>
+      <p class="terminal-line" id="terminalLine" aria-live="polite"></p>
+      <button class="begin-button" id="beginButton" disabled>
+        <span>Hacer florecer</span><i aria-hidden="true">✦</i>
+      </button>
+      <small>Hecho con código, especialmente para ti.</small>
+    </div>
+  </section>
 
 <div class="name-wrapper">
     <div class="name-container">
       <span>A</span><span>n</span><span>y</span>
     </div>
-    <div class="name-phrase">For my crazy girl ❤️</div>
+    <div class="name-phrase">Un jardín que nunca se marchitará</div>
 
   </div>
   <div class="night"></div>
@@ -334,6 +352,39 @@
       </div>
     </div>
   </div>
+
+  <div class="experience-ui" aria-live="polite">
+    <p class="discover-copy" id="discoverCopy">Toca cada flor y descubre lo que guarda</p>
+    <div class="discovery-progress" id="discoveryProgress" aria-label="Flores descubiertas"></div>
+  </div>
+
+  <button class="sound-button" id="soundButton" type="button" aria-label="Activar ambiente sonoro" aria-pressed="false">
+    <span class="sound-icon" aria-hidden="true">♪</span><span class="sound-label">Sonido</span>
+  </button>
+
+  <button class="letter-button" id="letterButton" type="button" hidden>
+    Abrir mi carta para ti <span aria-hidden="true">✦</span>
+  </button>
+
+  <dialog class="memory-dialog" id="memoryDialog">
+    <button class="dialog-close" id="dialogClose" type="button" aria-label="Cerrar">×</button>
+    <div class="dialog-flower" aria-hidden="true">✦</div>
+    <p class="dialog-kicker" id="dialogKicker">RAZÓN 01</p>
+    <p class="dialog-message" id="dialogMessage"></p>
+    <button class="dialog-next" id="dialogNext" type="button">Descubrir otra flor</button>
+  </dialog>
+
+  <dialog class="letter-dialog" id="letterDialog">
+    <button class="dialog-close" id="letterClose" type="button" aria-label="Cerrar">×</button>
+    <article class="letter-paper">
+      <p class="letter-kicker">PARA ANY</p>
+      <h1>Mi niña bonita,</h1>
+      <p>Tal vez un ramo natural se marchite con el tiempo. Por eso quise hacerte uno diferente: un jardín construido línea por línea, pensado para que siempre puedas volver a él.</p>
+      <p>Cada flor guarda una pequeña parte de todo lo que provocas en mí: calma, alegría y unas ganas enormes de seguir creando recuerdos contigo.</p>
+      <p>No pude regalarte todas las flores del mundo, así que programé unas que nunca se marchitarán.</p>
+      <p class="letter-signature">Con todo mi cariño,<br><strong>Rafa</strong></p>
+    </article>
+  </dialog>
 
   <script src="script.js"></script>
 </body>
