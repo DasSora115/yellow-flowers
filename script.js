@@ -30,23 +30,37 @@ const musicClose = document.querySelector("#musicClose");
 const musicContinue = document.querySelector("#musicContinue");
 const musicPlayButton = document.querySelector("#musicPlayButton");
 const musicPlayLabel = musicPlayButton.querySelector(".music-play-label");
-const spotifyEmbed = document.querySelector("#spotifyEmbed");
 const discovered = new Set();
 const isTouchViewport = window.matchMedia("(pointer: coarse)");
 const flowerHotspots = [];
 let lastHotspotSync = 0;
-let spotifyController;
-let spotifyPlaying = false;
+let youtubePlayer;
+let musicPlaying = false;
+let pendingMusicStart = false;
 
-window.onSpotifyIframeApiReady = (IFrameAPI) => {
-  IFrameAPI.createController(spotifyEmbed, {
+function updateMusicButton(playing) {
+  musicPlaying = playing;
+  musicPlayButton.querySelector("span[aria-hidden]").textContent = playing ? "❚❚" : "▶";
+  musicPlayLabel.textContent = playing ? "Pausar M.A.I" : "Reproducir M.A.I";
+  soundButton.classList.toggle("is-highlighted", playing);
+}
+
+window.onYouTubeIframeAPIReady = () => {
+  youtubePlayer = new YT.Player("youtubePlayer", {
     width: "100%",
-    height: "152",
-    uri: "spotify:track:35ttE4t8lQZA2vuCYDg4G7"
-  }, (controller) => {
-    spotifyController = controller;
-    musicPlayButton.disabled = false;
-    musicPlayLabel.textContent = "Reproducir M.A.I";
+    height: "200",
+    videoId: "MldGX_mbS-o",
+    playerVars: { playsinline: 1, controls: 1, rel: 0 },
+    events: {
+      onReady: () => {
+        musicPlayButton.disabled = false;
+        musicPlayLabel.textContent = "Reproducir M.A.I";
+        if (pendingMusicStart) youtubePlayer.playVideo();
+      },
+      onStateChange: (event) => {
+        updateMusicButton(event.data === YT.PlayerState.PLAYING);
+      }
+    }
   });
 };
 
@@ -224,8 +238,9 @@ beginButton.addEventListener("click", async () => {
   body.classList.add("experience-started");
   opening.classList.add("is-gone");
   createShootingStar();
-  soundButton.classList.add("is-highlighted");
   showCenteredDialog(musicDialog);
+  pendingMusicStart = true;
+  youtubePlayer?.playVideo();
   await wait(3300);
   body.classList.add("experience-ready");
   setFlowerHotspotsEnabled(true);
@@ -242,12 +257,9 @@ letterClose.addEventListener("click", () => letterDialog.close());
 musicClose.addEventListener("click", () => musicDialog.close());
 musicContinue.addEventListener("click", () => musicDialog.close());
 musicPlayButton.addEventListener("click", () => {
-  if (!spotifyController) return;
-  spotifyController.togglePlay();
-  spotifyPlaying = !spotifyPlaying;
-  musicPlayButton.querySelector("span[aria-hidden]").textContent = spotifyPlaying ? "❚❚" : "▶";
-  musicPlayLabel.textContent = spotifyPlaying ? "Pausar M.A.I" : "Reproducir M.A.I";
-  soundButton.classList.toggle("is-highlighted", spotifyPlaying);
+  if (!youtubePlayer) return;
+  if (musicPlaying) youtubePlayer.pauseVideo();
+  else youtubePlayer.playVideo();
 });
 soundButton.addEventListener("click", () => {
   soundButton.classList.remove("is-highlighted");
